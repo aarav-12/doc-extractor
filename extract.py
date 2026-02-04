@@ -1,42 +1,80 @@
-
 import re
 import fitz
 
-# Open PDF
-doc = fitz.open("policy.pdf")
 
-# Extract full text
-text = ""
-for page in doc:
-    text += page.get_text()
+def extract_text_from_pdf(pdf_path):
+    doc = fitz.open(pdf_path)
+    full_text = ""
 
-# REGEX EXTRACTION 
+    for page in doc:
+        page_text = page.get_text()
+        full_text += page_text + "\n"
 
-policy_no = re.search(
-    r"(?<!Prev\s)Policy No\s*:\s*([0-9/]+)",
-    text
-)
+    return full_text
 
 
-policy_period = re.search(
-    r"FROM\s+[0-9: ]+ON\s+([0-9/]+)\s+TO\s+MIDNIGHT\s+OF\s+([0-9/]+)",
-    text
-)
-gross_premium = re.search(r"\n\s*([0-9,]+)\s*\n\s*[0-9,]+\s*\n\s*\.5\s*\n\s*[0-9,]+", text)
-gst = re.search(r"\n\s*[0-9,]+\s*\n\s*([0-9,]+)\s*\n\s*\.5", text)
-total_premium = re.search(r"\n\s*[0-9,]+\s*\n\s*[0-9,]+\s*\n\s*\.5\s*\n\s*([0-9,]+)", text)
+def find_policy_number(text):
+    lines = text.split("\n")
 
-#STRUCTURED OUTPUT
+    for line in lines:
+        if "Policy No" in line and "Prev" not in line:
+            match = re.search(r"([0-9/]+)", line)
+            if match:
+                return match.group(1)
 
-data = {
-    "policy_number": policy_no.group(1) if policy_no else None,
-    "policy_period": {
-        "from": policy_period.group(1),
-        "to": policy_period.group(2)
-    } if policy_period else None,
-    "gross_premium": gross_premium.group(1).replace(",", "") if gross_premium else None,
-    "gst": gst.group(1).replace(",", "") if gst else None,
-    "total_premium": total_premium.group(1).replace(",", "") if total_premium else None
-}
+    return None
 
-print(data)
+
+def find_policy_period(text):
+    match = re.search(
+        r"FROM\s+[0-9: ]+ON\s+([0-9/]+)\s+TO\s+MIDNIGHT\s+OF\s+([0-9/]+)",
+        text
+    )
+
+    if match:
+        return {
+            "from": match.group(1),
+            "to": match.group(2)
+        }
+
+    return None
+
+
+def find_premium_values(text):
+    numbers = re.findall(r"\b[0-9,]{3,}\b", text)
+
+    cleaned = []
+    for num in numbers:
+        cleaned.append(num.replace(",", ""))
+
+    # From observation of the document structure
+    if len(cleaned) >= 3:
+        gross = cleaned[0]
+        gst = cleaned[1]
+        total = cleaned[2]
+        return gross, gst, total
+
+    return None, None, None
+
+
+def main():
+    text = extract_text_from_pdf("policy.pdf")
+
+    policy_number = find_policy_number(text)
+    policy_period = find_policy_period(text)
+
+    gross_premium, gst, total_premium = find_premium_values(text)
+
+    data = {
+        "policy_number": policy_number,
+        "policy_period": policy_period,
+        "gross_premium": gross_premium,
+        "gst": gst,
+        "total_premium": total_premium
+    }
+
+    print(data)
+
+
+if __name__ == "__main__":
+    main()
