@@ -1,4 +1,7 @@
 Insurance Document Parsing Approach
+
+The extraction logic was refined iteratively by inspecting the document structure and adjusting patterns based on the observed layout, rather than relying on a single generic rule
+
 1. Understanding the Problem
 
 The goal of this task is to extract important financial information from an insurance document in a structured and reliable way. Insurance PDFs are usually long, semi-structured, and contain both generic policy wording and customer-specific details, so the main challenge is identifying which parts of the document actually contain meaningful financial data.
