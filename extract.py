@@ -43,10 +43,13 @@ for page in doc:
     text += page.get_text()
 
 # print(len(text))
-for i, page in enumerate(doc):
-    page_text = page.get_text().lower()
-    if "policy schedule" in page_text:
-        print("Policy Schedule found on page:", i + 1)
+for i in range(1, 7):  # pages 2 to 7
+    page_text = doc[i].get_text().lower()
+    if any(keyword in page_text for keyword in [
+        "policy no", "policy number", "premium", "sum insured", "gross premium", "total premium"
+    ]):
+        print("Financial data found on page:", i + 1)
         print(page_text[:1200])
         break
+
 
