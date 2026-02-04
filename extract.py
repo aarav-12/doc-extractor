@@ -43,11 +43,11 @@ for page in doc:
     text += page.get_text()
 
 # print(len(text))
-for i, page in enumerate(doc):
-    page_text = page.get_text()
-    if "premium" in page_text.lower() or "amount" in page_text.lower():
-        print("Found on page:", i + 1)
-        print(page_text[:500])
-        break
+for i, page in enumerate(doc[:10]):  # only first 10 pages
+    page_text = page.get_text().lower()
+    if "premium" in page_text or "policy number" in page_text or "policy no" in page_text:
+        print("Found candidate on page:", i + 1)
+        print(page_text[:700])
 
 
+print(text[:1000])
