@@ -42,5 +42,12 @@ text = ""
 for page in doc:
     text += page.get_text()
 
-print(len(text))
+# print(len(text))
+for i, page in enumerate(doc):
+    page_text = page.get_text()
+    if "premium" in page_text.lower() or "amount" in page_text.lower():
+        print("Found on page:", i + 1)
+        print(page_text[:500])
+        break
+
 
